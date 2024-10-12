@@ -124,12 +124,48 @@ async function unfollowInactiveUsers(token, userId) {
   return unfollowCount;
 }
 
+async function getAccountsToUnfollow(token, userId) {
+  const interactedAccounts = await getRecentInteractions(token, userId);
+  const following = await getFollowing(token, userId);
+  
+  return following.filter(user => !interactedAccounts.includes(user.id));
+}
+
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "startUnfollow") {
     getAuthToken()
       .then(async token => {
         const userId = await getUserId(token);
         const unfollowCount = await unfollowInactiveUsers(token, userId);
+        sendResponse({status: "completed", result: `Unfollowed ${unfollowCount} accounts.`});
+      })
+      .catch(error => {
+        sendResponse({status: "error", message: error.message});
+      });
+    return true; // Indicates that the response will be sent asynchronously
+  } else if (request.action === "getAccountsToUnfollow") {
+    getAuthToken()
+      .then(async token => {
+        const userId = await getUserId(token);
+        const accountsToUnfollow = await getAccountsToUnfollow(token, userId);
+        sendResponse({status: "completed", accounts: accountsToUnfollow});
+      })
+      .catch(error => {
+        sendResponse({status: "error", message: error.message});
+      });
+    return true; // Indicates that the response will be sent asynchronously
+  } else if (request.action === "unfollowSelected") {
+    getAuthToken()
+      .then(async token => {
+        let unfollowCount = 0;
+        for (const userId of request.selectedUsers) {
+          const unfollowed = await unfollowUser(token, userId);
+          if (unfollowed) {
+            unfollowCount++;
+          }
+          // Add a delay to avoid rate limiting
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
         sendResponse({status: "completed", result: `Unfollowed ${unfollowCount} accounts.`});
       })
       .catch(error => {

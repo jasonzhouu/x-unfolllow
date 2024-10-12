@@ -25,4 +25,15 @@ button:hover {
 
 #status {
   font-size: 14px;
+  margin-bottom: 10px;
+}
+
+#accountList {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-bottom: 10px;
+}
+
+#accountList div {
+  margin-bottom: 5px;
 }
