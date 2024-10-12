@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "Twitter Unfollow Assistant",
+  "version": "1.0",
+  "description": "Unfollow Twitter accounts you haven't interacted with in the last 3 months",
+  "permissions": [
+    "identity",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://api.twitter.com/*"
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  }
+}
